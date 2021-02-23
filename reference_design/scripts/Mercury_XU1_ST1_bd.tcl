@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------
-# Copyright (c) 2020 by Enclustra GmbH, Switzerland.
+# Copyright (c) 2021 by Enclustra GmbH, Switzerland.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this hardware, software, firmware, and associated documentation files (the
@@ -60,6 +60,7 @@ set_property -dict [ list \
   CONFIG.PSU__ENET3__PERIPHERAL__ENABLE {1} \
   CONFIG.PSU__ENET3__GRP_MDIO__ENABLE {0} \
   CONFIG.PSU__USB0__PERIPHERAL__ENABLE {1} \
+  CONFIG.PSU__USB__RESET__MODE {Disable} \
   CONFIG.PSU__FPGA_PL1_ENABLE {1} \
   CONFIG.PSU__CRL_APB__PL1_REF_CTRL__FREQMHZ {50} \
   CONFIG.PSU__GPIO0_MIO__PERIPHERAL__ENABLE {1} \
