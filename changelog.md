@@ -7,3 +7,10 @@
 * Added Petalinux BSP to release binaries
 * Versioning now includes Xilinx tool version
 * Doc: Reworded ECC RAM section
+## 2020.2_v1.1.1
+* Doc: Fix incompatible project name suggestion including a '+'
+* Doc: Refer to system instead of application for creating boot image and program flash
+* Doc: Updates in troubleshoot section and workarounds
+* Doc: Minor optimizations
+* Doc: Corrections in QSPI programming guide with MCT
+* Doc: Improve MCT instructions
