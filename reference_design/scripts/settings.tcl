@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------
-# Copyright (c) 2021 by Enclustra GmbH, Switzerland.
+# Copyright (c) 2022 by Enclustra GmbH, Switzerland.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this hardware, software, firmware, and associated documentation files (the
@@ -47,6 +47,7 @@ if {![info exists baseboard]}   {set baseboard ST1}
 if {[lindex $argv 0] != ""} { set module_name [lindex $argv 0] }
 
 set module Mercury_XU1
+set family zynqmp
 
 switch $module_name {
   ME-XU1-6CG-1E-D11E {
@@ -57,7 +58,7 @@ switch $module_name {
   ME-XU1-6CG-1E-D11E-G1 {
     set part xczu6cg-ffvc900-1-e 
     set PS_DDR PS_D11E
-    set MGT_routing None
+    set MGT_routing G1
   }
   ME-XU1-6EG-1I-D11E {
     set part xczu6eg-ffvc900-1-i 
@@ -67,12 +68,12 @@ switch $module_name {
   ME-XU1-6EG-1I-D11E-G1 {
     set part xczu6eg-ffvc900-1-i 
     set PS_DDR PS_D11E
-    set MGT_routing None
+    set MGT_routing G1
   }
   ME-XU1-9EG-1E-D11E-G1 {
     set part xczu9eg-ffvc900-1-e 
     set PS_DDR PS_D11E
-    set MGT_routing None
+    set MGT_routing G1
   }
   ME-XU1-9EG-2I-D12E {
     set part xczu9eg-ffvc900-2-i 
@@ -82,7 +83,7 @@ switch $module_name {
   ME-XU1-9EG-2I-D12E-G1 {
     set part xczu9eg-ffvc900-2-i 
     set PS_DDR PS_D12E
-    set MGT_routing None
+    set MGT_routing G1
   }
   ME-XU1-9EG-3E-D12E {
     set part xczu9eg-ffvc900-3-e 
@@ -92,7 +93,7 @@ switch $module_name {
   ME-XU1-15EG-1E-D12E-G1 {
     set part xczu15eg-ffvc900-1-e 
     set PS_DDR PS_D12E
-    set MGT_routing None
+    set MGT_routing G1
   }
   ME-XU1-15EG-2I-D12E {
     set part xczu15eg-ffvc900-2-i 
@@ -102,7 +103,7 @@ switch $module_name {
   ME-XU1-15EG-2I-D12E-G1 {
     set part xczu15eg-ffvc900-2-i 
     set PS_DDR PS_D12E
-    set MGT_routing None
+    set MGT_routing G1
   }
   default {
     puts "$module_name not available"
@@ -115,7 +116,6 @@ if {![info exists project_name]} {
   set project_name ${module}
   if {[info exists baseboard]} {
     lappend project_name ${baseboard}
-    puts $project_name
   }
   set project_name [string map {" " "_"} "${project_name}"]
 }

@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
--- Copyright (c) 2021 by Enclustra GmbH, Switzerland.
+-- Copyright (c) 2022 by Enclustra GmbH, Switzerland.
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy of
 -- this hardware, software, firmware, and associated documentation files (the
@@ -33,7 +33,7 @@ entity Mercury_XU1_ST1 is
   
   port (
     
-    -- Anios_0
+    -- Anios 0
     IO0_D0_P                       : inout   std_logic;
     IO0_D1_N                       : inout   std_logic;
     IO0_D2_P                       : inout   std_logic;
@@ -58,10 +58,10 @@ entity Mercury_XU1_ST1 is
     IO0_D21_N                      : inout   std_logic;
     IO0_D22_P                      : inout   std_logic;
     IO0_D23_N                      : inout   std_logic;
-    IO0_CLK1_N                     : inout   std_logic;
-    IO0_CLK0_P                     : inout   std_logic;
+    IO0_CLK_N                      : inout   std_logic;
+    IO0_CLK_P                      : inout   std_logic;
     
-    -- Anios_1
+    -- Anios 1
     IO1_D0_P                       : inout   std_logic;
     IO1_D1_N                       : inout   std_logic;
     IO1_D2_P                       : inout   std_logic;
@@ -89,13 +89,20 @@ entity Mercury_XU1_ST1 is
     IO1_CLK1_N                     : inout   std_logic;
     IO1_CLK0_P                     : inout   std_logic;
     
-    -- DP
+    -- BUTTONS
+    BTN1_N                         : in      std_logic;
+    
+    -- Clock Generator CLK0
+    CLK_USR_N                      : in      std_logic;
+    CLK_USR_P                      : in      std_logic;
+    
+    -- Display Port
     DP_HPD                         : in      std_logic;
     DP_AUX_IN                      : in      std_logic;
     DP_AUX_OE                      : out     std_logic;
     DP_AUX_OUT                     : out     std_logic;
     
-    -- FMC
+    -- FMC HPC Connector
     FMC_HA02_N                     : inout   std_logic;
     FMC_HA02_P                     : inout   std_logic;
     FMC_HA03_N                     : inout   std_logic;
@@ -200,13 +207,20 @@ entity Mercury_XU1_ST1 is
     FMC_CLK1_M2C_P                 : inout   std_logic;
     
     -- HDMI
-    HDMI_HPD                       : inout   std_logic;
-    HDMI_CLK_N                     : inout   std_logic;
-    HDMI_CLK_P                     : inout   std_logic;
+    HDMI_HPD                       : in      std_logic;
+    HDMI_CLK_N                     : out     std_logic;
+    HDMI_CLK_P                     : out     std_logic;
     
-    -- I2C_PL
-    I2C_SCL_PL                     : inout   std_logic;
-    I2C_SDA_PL                     : inout   std_logic;
+    -- I2C FPGA
+    I2C_SCL_FPGA                   : inout   std_logic;
+    I2C_SDA_FPGA                   : inout   std_logic;
+    
+    -- I2C_MIPI_SEL
+    I2C_MIPI_SEL                   : inout   std_logic;
+    
+    -- I2C PL
+    I2C_SCL                        : inout   std_logic;
+    I2C_SDA                        : inout   std_logic;
     
     -- IO3
     IO3_D0_P                       : inout   std_logic;
@@ -234,23 +248,27 @@ entity Mercury_XU1_ST1 is
     MIPI0_D0_P                     : inout   std_logic;
     MIPI0_D1_N                     : inout   std_logic;
     MIPI0_D1_P                     : inout   std_logic;
-    MIPI0_CLK_N                    : inout   std_logic;
-    MIPI0_CLK_P                    : inout   std_logic;
     MIPI0_CLK_D0LP_N               : inout   std_logic;
     MIPI0_CLK_D0LP_P               : inout   std_logic;
+    MIPI0_CLK_N                    : inout   std_logic;
+    MIPI0_CLK_P                    : inout   std_logic;
     
     -- MIPI1
     MIPI1_D0_N                     : inout   std_logic;
     MIPI1_D0_P                     : inout   std_logic;
     MIPI1_D1_N                     : inout   std_logic;
     MIPI1_D1_P                     : inout   std_logic;
-    MIPI1_CLK_N                    : inout   std_logic;
-    MIPI1_CLK_P                    : inout   std_logic;
     MIPI1_CLK_D0LP_N               : inout   std_logic;
     MIPI1_CLK_D0LP_P               : inout   std_logic;
+    MIPI1_CLK_N                    : inout   std_logic;
+    MIPI1_CLK_P                    : inout   std_logic;
     
-    -- OSC_100M
-    CLK_100_CAL                    : in      std_logic
+    -- Oscillator 100 MHz
+    CLK_100_CAL                    : in      std_logic;
+    
+    -- ST1 LED
+    LED2                           : out     std_logic;
+    LED3                           : out     std_logic
   );
 end Mercury_XU1_ST1;
 
@@ -267,10 +285,33 @@ architecture rtl of Mercury_XU1_ST1 is
       DP_HPD              : in     std_logic;
       Clk100              : out    std_logic;
       Clk50               : out    std_logic;
-      Rst_N               : out    std_logic
+      Rst_N               : out    std_logic;
+      IIC_FPGA_sda_i      : in     std_logic;
+      IIC_FPGA_sda_o      : out    std_logic;
+      IIC_FPGA_sda_t      : out    std_logic;
+      IIC_FPGA_scl_i      : in     std_logic;
+      IIC_FPGA_scl_o      : out    std_logic;
+      IIC_FPGA_scl_t      : out    std_logic
     );
     
   end component Mercury_XU1;
+  
+  component OBUFDS is
+    port (
+      I : in STD_LOGIC;
+      O : out STD_LOGIC;
+      OB : out STD_LOGIC
+    );
+  end component OBUFDS;
+  
+  component IOBUF is
+    port (
+      I : in STD_LOGIC;
+      O : out STD_LOGIC;
+      T : in STD_LOGIC;
+      IO : inout STD_LOGIC
+    );
+  end component IOBUF;
 
   ---------------------------------------------------------------------------------------------------
   -- signal declarations
@@ -278,6 +319,12 @@ architecture rtl of Mercury_XU1_ST1 is
   signal Clk100           : std_logic;
   signal Clk50            : std_logic;
   signal Rst_N            : std_logic;
+  signal IIC_FPGA_sda_i   : std_logic;
+  signal IIC_FPGA_sda_o   : std_logic;
+  signal IIC_FPGA_sda_t   : std_logic;
+  signal IIC_FPGA_scl_i   : std_logic;
+  signal IIC_FPGA_scl_o   : std_logic;
+  signal IIC_FPGA_scl_t   : std_logic;
   signal dp_aux_data_oe_n : std_logic;
   signal LedCount         : unsigned(23 downto 0);
 
@@ -294,10 +341,40 @@ begin
       DP_HPD               => DP_HPD,
       Clk100               => Clk100,
       Clk50                => Clk50,
-      Rst_N                => Rst_N
+      Rst_N                => Rst_N,
+      IIC_FPGA_sda_i       => IIC_FPGA_sda_i,
+      IIC_FPGA_sda_o       => IIC_FPGA_sda_o,
+      IIC_FPGA_sda_t       => IIC_FPGA_sda_t,
+      IIC_FPGA_scl_i       => IIC_FPGA_scl_i,
+      IIC_FPGA_scl_o       => IIC_FPGA_scl_o,
+      IIC_FPGA_scl_t       => IIC_FPGA_scl_t
     );
   
   DP_AUX_OE <= not dp_aux_data_oe_n;
+  
+  hdmi_clock_buf: component OBUFDS
+    port map (
+      I => '0',
+      O => HDMI_CLK_P,
+      OB => HDMI_CLK_N
+    );
+  
+  IIC_FPGA_scl_iobuf: component IOBUF
+    port map (
+      I => IIC_FPGA_scl_o,
+      IO => I2C_SCL_FPGA,
+      O => IIC_FPGA_scl_i,
+      T => IIC_FPGA_scl_t
+    );
+  
+  IIC_FPGA_sda_iobuf: component IOBUF
+    port map (
+      I => IIC_FPGA_sda_o,
+      IO => I2C_SDA_FPGA,
+      O => IIC_FPGA_sda_i,
+      T => IIC_FPGA_sda_t
+    );
+  
   process (Clk50)
   begin
     if rising_edge (Clk50) then
@@ -309,5 +386,5 @@ begin
     end if;
   end process;
   LED2_N_PWR_SYNC <= '0' when LedCount(LedCount'high) = '0' else 'Z';
-
+  
 end rtl;

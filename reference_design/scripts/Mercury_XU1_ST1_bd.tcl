@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------
-# Copyright (c) 2021 by Enclustra GmbH, Switzerland.
+# Copyright (c) 2022 by Enclustra GmbH, Switzerland.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this hardware, software, firmware, and associated documentation files (the
@@ -71,11 +71,6 @@ set_property -dict [ list \
   CONFIG.PSU_MIO_23_PULLUPDOWN {disable} \
 ] [get_bd_cells zynq_ultra_ps_e]
 
-create_bd_cell -type ip -vlnv xilinx.com:ip:system_management_wiz system_management_wiz
-set_property -dict [ list \
-  CONFIG.CHANNEL_ENABLE_VP_VN {false} \
-] [get_bd_cells system_management_wiz]
-
 if { $PS_DDR == "PS_D11E"} {
   set_property -dict [ list \
     CONFIG.PSU__DDRC__SPEED_BIN {DDR4_2400T} \
@@ -103,6 +98,29 @@ if { $PS_DDR == "PS_D12E"} {
     CONFIG.PSU__DDRC__BUS_WIDTH {64 Bit} \
   ] [get_bd_cells zynq_ultra_ps_e]
 }
+
+create_bd_cell -type ip -vlnv xilinx.com:ip:system_management_wiz system_management_wiz
+set_property -dict [ list \
+  CONFIG.TEMPERATURE_ALARM_OT_TRIGGER {85} \
+  CONFIG.CHANNEL_ENABLE_VP_VN {false} \
+] [get_bd_cells system_management_wiz]
+set_property -dict [ list \
+  CONFIG.PSU_MIO_13_PULLUPDOWN {disable} \
+  CONFIG.PSU_MIO_14_PULLUPDOWN {disable} \
+  CONFIG.PSU_MIO_15_PULLUPDOWN {disable} \
+  CONFIG.PSU_MIO_16_PULLUPDOWN {disable} \
+  CONFIG.PSU_MIO_17_PULLUPDOWN {disable} \
+  CONFIG.PSU_MIO_18_PULLUPDOWN {disable} \
+  CONFIG.PSU_MIO_19_PULLUPDOWN {disable} \
+  CONFIG.PSU_MIO_20_PULLUPDOWN {disable} \
+  CONFIG.PSU_MIO_21_PULLUPDOWN {disable} \
+  CONFIG.PSU__SD0__PERIPHERAL__IO {MIO 13 .. 22} \
+  CONFIG.PSU__SD0__DATA_TRANSFER_MODE {8Bit} \
+] [get_bd_cells zynq_ultra_ps_e]
+set_property -dict [ list \
+  CONFIG.PSU__I2C1__PERIPHERAL__ENABLE {1} \
+  CONFIG.PSU__I2C1__PERIPHERAL__IO {EMIO} \
+] [get_bd_cells zynq_ultra_ps_e]
 set_property -dict [ list \
   CONFIG.PSU__USB3_0__PERIPHERAL__ENABLE {1} \
   CONFIG.PSU__USB3_0__PERIPHERAL__IO {GT Lane2} \
@@ -110,18 +128,22 @@ set_property -dict [ list \
   CONFIG.PSU__USB0__REF_CLK_FREQ {100} \
 ] [get_bd_cells zynq_ultra_ps_e]
 
-create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_0
-set_property -dict [list CONFIG.NUM_SI {1}] [get_bd_cells smartconnect_0]
-connect_bd_intf_net [get_bd_intf_pins zynq_ultra_ps_e/M_AXI_HPM0_LPD] [get_bd_intf_pins smartconnect_0/S00_AXI]
-connect_bd_intf_net [get_bd_intf_pins smartconnect_0/M00_AXI] [get_bd_intf_pins system_management_wiz/S_AXI_LITE]
-connect_bd_net [get_bd_pins smartconnect_0/aclk] [get_bd_pins zynq_ultra_ps_e/pl_clk0]
 connect_bd_net [get_bd_pins zynq_ultra_ps_e/maxihpm0_lpd_aclk] [get_bd_pins zynq_ultra_ps_e/pl_clk0]
-connect_bd_net [get_bd_pins system_management_wiz/s_axi_aclk] [get_bd_pins zynq_ultra_ps_e/pl_clk0]
 create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 ps_sys_rst
 connect_bd_net [get_bd_pins ps_sys_rst/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e/pl_clk0]
-connect_bd_net [get_bd_pins ps_sys_rst/peripheral_aresetn] [get_bd_pins system_management_wiz/s_axi_aresetn]
 connect_bd_net [get_bd_pins ps_sys_rst/ext_reset_in] [get_bd_pins zynq_ultra_ps_e/pl_resetn0]
-connect_bd_net [get_bd_pins ps_sys_rst/interconnect_aresetn] [get_bd_pins smartconnect_0/aresetn]
+set IIC_FPGA [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:iic_rtl:1.0 IIC_FPGA ]
+connect_bd_intf_net [get_bd_intf_ports IIC_FPGA] [get_bd_intf_pins zynq_ultra_ps_e/IIC_1]
+
+create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect smartconnect_00
+set_property -dict [list CONFIG.NUM_MI {1} CONFIG.NUM_CLKS {1} CONFIG.NUM_SI {1}] [get_bd_cells smartconnect_00]
+connect_bd_intf_net [get_bd_intf_pins zynq_ultra_ps_e/M_AXI_HPM0_LPD] [get_bd_intf_pins smartconnect_00/S00_AXI]
+connect_bd_net [get_bd_pins zynq_ultra_ps_e/pl_clk0] [get_bd_pins smartconnect_00/aclk]
+connect_bd_net [get_bd_pins ps_sys_rst/interconnect_aresetn] [get_bd_pins smartconnect_00/aresetn]
+connect_bd_intf_net [get_bd_intf_pins smartconnect_00/M00_AXI ] [get_bd_intf_pins system_management_wiz/S_AXI_LITE]
+
+connect_bd_net [get_bd_pins ps_sys_rst/peripheral_aresetn] [get_bd_pins system_management_wiz/s_axi_aresetn]
+connect_bd_net [get_bd_pins zynq_ultra_ps_e/pl_clk0] [get_bd_pins system_management_wiz/s_axi_aclk]
 
 set DP_AUX_OUT [ create_bd_port -dir O DP_AUX_OUT]
 connect_bd_net [get_bd_ports DP_AUX_OUT] [get_bd_pins zynq_ultra_ps_e/dp_aux_data_out]
