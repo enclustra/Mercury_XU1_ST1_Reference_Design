@@ -1,3 +1,10 @@
+## 2024.2_v1.2.3
+* Adjust PS reference clock frequency to remove rounding errors
+* Removed ME-XU1-15EG-2I-D12E-G1, ME-XU1-9EG-3E-D12E and ME-XU1-6CG-1E-D11E product models
+* Added ME-XU1-15EG-1E-D12E-G1 product model back again
+* Added new product model ME-XU1-9EG-1E-D12E-G1
+* Remove component declarations for components provided by the unisim library
+
 ## 2024.1_v1.1.3
 * Removed MIPI pins from constraints file
 * Add CLK_USR IOBUFDS instance to top level VHDL
